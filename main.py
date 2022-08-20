@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
-from typing import Union, Optional, List
+from typing import Union, Optional, List 
 from pydantic import BaseModel, Field
+from database import dbSession
 app = FastAPI()
 
 
@@ -115,3 +116,20 @@ def query_cookies_extractor(cookies_param : Optional[str], query_params : str = 
 @app.get('/token/items/')    
 def extract_query(query_items : str = Depends(query_cookies_extractor,use_cache= False )):
     return {'message':query_items }
+
+
+#  yielding -- >  allows extra steps to be performed on dependencies 
+def get_db():
+    db = dbSession()
+    try:
+       yield  db
+    finally:
+        db.close()
+
+
+#  
+def create_user(db: Session= Depends(get_db) ):
+    # user = db.USerModel().filter()
+    # db.commit()
+    # db.refresh(user)
+    # return user
